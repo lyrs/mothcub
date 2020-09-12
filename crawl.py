@@ -5,17 +5,14 @@ from bs4 import BeautifulSoup
 import os
 import time
 
-# TODO: add init (scrap one certain image at the first time)
-# instead of doing in manually, in case of deleting all art files :)
-
 # url address
 URL = "https://mothcub.tumblr.com/tagged/art"
 # page count
 page_no = 1
 # the most recent saved image
-RECENT = sorted(os.listdir("art/pre"))[-1]
+RECENT = sorted(["178038585699"] + os.listdir("art/"))[-1]
 # big img id, should work for the next few years
-img_id = "9"*12
+img_id = "9"*20
 
 while img_id > RECENT:
     # crawl source
@@ -30,10 +27,10 @@ while img_id > RECENT:
     arts = page.findAll("div", {"class": "photo"})
     for art in arts:
         img_id = art.img.parent["href"].split('/')[-1]
+        urllib.request.urlretrieve(
+            art.img["src"], "art/" + img_id)
         if img_id == RECENT:
             break
-        else:
-            urllib.request.urlretrieve(
-                art.img["src"], "art/pre/" + img_id)
-        print(img_id)
     page_no += 1
+    print('#', end='')    
+    
