@@ -15,7 +15,7 @@ args = ap.parse_args()
 # load and convert
 images = cv2.imread(args.image) 
 rgb = cv2.cvtColor(images, cv2.COLOR_BGR2RGB) 
-results = pytesseract.image_to_data(rgb, output_type=Output.DICT) 
+results = pytesseract.image_to_data(rgb, output_type=Output.DICT)
 
 # loop over findings
 for i in range(0, len(results["text"])):   

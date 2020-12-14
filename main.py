@@ -106,12 +106,13 @@ def find_text_passage(image):
   
   final = []
   for tp in text_passages:
-    x = letter_rois[tp[0],0]
-    X = letter_rois[tp[-1],0] + letter_rois[tp[-1],2]
-    rois = letter_rois[sorted(tp)][:]
-    y = min(rois[:,1])
-    Y = max(rois[:,1]+rois[:,3])
-    final.append((x,y,X,Y))
+    if len(tp) > 1:
+      x = letter_rois[tp[0],0]
+      X = letter_rois[tp[-1],0] + letter_rois[tp[-1],2]
+      rois = letter_rois[sorted(tp)][:]
+      y = min(rois[:,1])
+      Y = max(rois[:,1]+rois[:,3])
+      final.append((x,y,X,Y))
     #cv2.rectangle(image, (x,y), (X,Y), (255,0,0), 1)
     #cv2.imshow('?', image)
 
@@ -122,20 +123,35 @@ def OCR(image):
   M = 5
   coords = find_text_passage(image)
   texts = []
+  derps = []
   for cd in coords:
     x,y,X,Y = cd 
     #cv2.imshow(str(cd), image[y-M:Y+M,x-M:X+M])
     #cv2.waitKey()
     texts.append(pytesseract.image_to_string(
                     image[y-M:Y+M,x-M:X+M], lang='eng'))
-  return " ".join(list(filter(None,texts)))
+    derps.append((x,y,X,Y))
+  return (list(filter(None,texts))), derps
 
 
-with open("results.txt",'w+') as res:
-  for d in tqdm(sorted(os.listdir("testset/"))):
-    drawing = cv2.imread("testset/"+d)
-    #herp = find_letters_in(drawing)
-    res.write(normalize(OCR(drawing)) + "\n")
+#with open("results.txt",'w+') as res:
+#  for d in tqdm(sorted(os.listdir("testset/"))):
+#    drawing = cv2.imread("testset/"+d)
+#    #herp = find_letters_in(drawing)
+#    res.write(normalize(OCR(drawing)) + "\n")
 
-#cv2.imshow("text passage?", derp)
-#cv2.waitKey(0)
+drawing = cv2.imread(sys.argv[1])
+texts, coords = OCR(drawing)
+for i in range(len(texts)):
+  cv2.rectangle(drawing, 
+          (coords[i][0], coords[i][1]), 
+          (coords[i][2], coords[i][3]), 
+          (17, 163, 252), 1) 
+  cv2.putText(drawing, 
+        texts[i].rstrip(), 
+        (coords[i][0], coords[i][1] - 5), 
+        cv2.FONT_HERSHEY_SIMPLEX, 
+        0.5, (200, 0, 150), 1) 
+
+cv2.imshow(":D", drawing)
+cv2.waitKey(0)
